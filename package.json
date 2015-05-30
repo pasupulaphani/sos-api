@@ -4,6 +4,7 @@
   "main": "index.js",
   "dependencies": {
     "bunyan": "^0.22.1",
+    "mongodb": "^2.0.33",
     "restify": "~3.0.2",
     "twilio": "^2.2.1"
   },
