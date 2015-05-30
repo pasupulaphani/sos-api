@@ -5,39 +5,27 @@ var rest_endpoint = process.env.REST_ENDPOINT;
 
 var client = require('twilio')(sid, auth_token);
 
-var sendMessage = exports.sendMessage = function(to, msg, cb) {
+var sendMessage = exports.sendMessage = function(to, msg) {
 
-    console.log("sending msg to" + to);
+    console.log("sending msg to " + to);
 
-    client.sendMessage({
-
+    var promise = client.sendMessage({
         to: to,
         from: from_number,
         body: msg
-
-    }, function(error, message) {
-
-        if (error) {
-            console.error('We couldn\'t send the message');
-            console.error(error);
-        } else {
-            console.log('Success! The SID for this SMS message is:');
-            console.log(message.sid);
-
-            console.log('Message sent on:');
-            console.log(message.dateCreated);
-        }
-        cb || cb(error, response);
     });
+
+    return promise;
 }
 
-var makeCall = exports.makeCall = function(to, cb) {
+var makeCall = exports.makeCall = function(to, msgType, cb) {
 
+    msgType = msgType || 'sos';
     client.makeCall({
 
         to: to,
         from: from_number,
-        url: rest_endpoint + 'createVoiceMsg/hi'
+        url: rest_endpoint + 'createVoiceMsg/' + msgType
 
     }, function(error, response) {
 
@@ -65,8 +53,12 @@ var createVoiceMsg = exports.createVoiceMsg = function(req, res, next) {
         language: 'en-gb'
     };
 
+    var msg = "sos default msg"
+    if (req.param.msgType == "sos") {
+        msg = "Please call police if you do not hear from me in 10mins"
+    };
     twiml
-        .say('Hi from Sos', options);
+        .say(msg, options);
 
     res.writeHead(200, {
         'Content-Type': 'text/xml'

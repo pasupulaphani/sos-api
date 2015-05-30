@@ -15,18 +15,29 @@ module.exports = function(server) {
     }
 
     function sendMessage(req, res, next) {
-        twilioClient.sendMessage(req.params.number, req.body, function(error, response) {
-            if (error) {
+        twilioClient.sendMessage(req.params.number, req.body)
+            .then(function(message) {
+
+                console.log('Success! The SID for this SMS message is:');
+                console.log(message.sid);
+
+                console.log('Message sent on:');
+                console.log(message.dateCreated);
+                res.send(200);
+                next();
+
+            }, function(error) {
+
+                console.error('We couldn\'t send the message');
+                console.error(error);
                 res.json(_genErrResp(error), 500);
-            } else {
-                res.sendStatus(200);
-            }
-            next();
-        });
+                next();
+
+            });
     }
 
     function makeCall(req, res, next) {
-        twilioClient.makeCall(req.params.number, function() {
+        twilioClient.makeCall(req.params.number, 'sos', function() {
             console.log("cb exec")
         });
         res.send('Call made to ' + req.params.number);
